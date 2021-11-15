@@ -1,5 +1,5 @@
 from re import DEBUG
-from flask import Flask, render_template,request,jsonify
+from flask import Flask, render_template,request,jsonify,url_for
 import flask
 from nltk import text
 from werkzeug.wrappers import response
@@ -17,6 +17,13 @@ def predict():
     response= get_response(text)
     message={"answer":response}
     return jsonify(message)
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
 
 if __name__=="__main__":
     app.run(debug=True)
