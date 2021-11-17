@@ -3,7 +3,8 @@ class Chatbox {
         this.args = {
             openButton: document.querySelector('.chatbox__button'),
             chatBox: document.querySelector('.chatbox__support'),
-            sendButton: document.querySelector('.send__button')
+            sendButton: document.querySelector('.send__button'),
+            micButton: document.querySelector('#voice')
         }
 
         this.state = false;
@@ -11,11 +12,13 @@ class Chatbox {
     }
 
     display() {
-        const {openButton, chatBox, sendButton} = this.args;
+        const {openButton, chatBox, sendButton, micButton} = this.args;
 
         openButton.addEventListener('click', () => this.toggleState(chatBox))
 
         sendButton.addEventListener('click', () => this.onSendButton(chatBox))
+
+        micButton.addEventListener('click', () => this.onMicButton(chatBox))
 
         const node = chatBox.querySelector('input');
         node.addEventListener("keyup", ({key}) => {
@@ -67,6 +70,46 @@ class Chatbox {
             textField.value = ''
           });
     }
+    onMicButton(chatbox) {
+        var textField = chatbox.querySelector('input');
+        const startBtn = document.querySelector('#voice');
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = "en-US";
+        recognition.interimResults = false;
+        recognition.maxAlternative = 1;
+        const synth = window.speechSynthesis;
+        startBtn.addEventListener("click", () => {
+            recognition.start();
+        });
+
+        recognition.onresult = (e) => {
+            const text1 = e.results[e.results.length - 1][0].transcript.trim();
+            let msg1 = { name: "User", message: text1 }
+            this.messages.push(msg1);
+
+            fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                body: JSON.stringify({ message: text1 }),
+                mode: 'cors',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+            })
+            .then(r => r.json())
+            .then(r => {
+                let msg2 = { name: "Sam", message: r.answer };
+                this.messages.push(msg2);
+                this.updateChatText(chatbox)
+                textField.value = ''
+            }).catch((error) => {
+                console.error('Error:', error);
+                this.updateChatText(chatbox)
+                textField.value = ''
+            });
+        };
+    }    
+
 
     updateChatText(chatbox) {
         var html = '';

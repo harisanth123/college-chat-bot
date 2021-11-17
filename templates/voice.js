@@ -13,8 +13,9 @@ startBtn.addEventListener("click", () => {
 });
 
 recognition.onresult = (e) => {
+    console.log()
     const transcript = e.results[e.results.length - 1][0].transcript.trim();
-    if(transcript === "hello"){
+    if(transcript == "hello"){
         const utter = new SpeechSynthesisUtterance("my name is hari");
         synth.speak(utter);
     }
